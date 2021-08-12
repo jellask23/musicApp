@@ -1,0 +1,66 @@
+/* You can add global styles to this file, and also import other style files */
+
+/* @import "~@angular/material/prebuilt-themes/deeppurple-amber";    */
+
+@import url('https://fonts.googleapis.com/css2?family=Baloo+Tammudu+2:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=NTR&display=swap');
+html, body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.mat-slider .mat-slider-wrapper .mat-slider-thumb-container .mat-slider-thumb {
+    right: -9px;
+    bottom: -5px;
+    width: 10px !important;
+    height: 10px;
+}
+
+.mat-slider-min-value:not(.mat-slider-thumb-label-showing) .mat-slider-thumb {
+    border-color: rgba(255, 255, 255, 0.3);
+    background-color: white;
+}
+
+::-webkit-scrollbar {
+    display: none;
+}
+
+/* ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #8880;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #5550;
+} */
+
+.homeSection .homeContent .homeTiles .mat-grid-tile .mat-figure{
+    justify-content: flex-start !important;
+    background: #5555;
+}
+
+.dark-theme .mat-chip.mat-standard-chip {
+    background-color: #0000;
+    color: white;
+    border: 1.5px solid #999;
+}
+
+.librarySection .libraryMain .libraryContent .libraryContentTiles
+.mat-grid-tile.colGrid .mat-figure{
+    flex-direction: column;
+    align-items: flex-start;
+    cursor: pointer;
+}
+.librarySection .libraryMain .libraryContent .libraryContentTiles
+.mat-grid-tile.rowGrid .mat-figure{
+    flex-direction: row;
+    justify-content: flex-start;
+    cursor: pointer;
+}

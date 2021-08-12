@@ -1,0 +1,608 @@
+<div class="head_bar sticky-top" *ngIf="batteryCheck()">
+    <div class="start">
+        <span class="me-2 ms-1">{{now | date:'hh:mm'}}</span>
+        <mat-icon>email</mat-icon>
+        <mat-icon>message</mat-icon>
+        <mat-icon>voicemail</mat-icon>
+    </div>
+    <div class="end">
+        <mat-icon class="material-icons-outlined">network_wifi</mat-icon>
+        <mat-icon class="material-icons-outlined">network_cell</mat-icon>
+        <mat-icon>battery_std</mat-icon>
+        <!-- <span><svg id="#1f6e43ff" x="37" y="37" width="11" height="12" >
+            <rect width="50%" height="100%" fill="#fff"/>
+          </svg></span> -->
+        <!-- <mat-icon>93%</mat-icon> -->
+        <span class="me-1">{{battery}}%</span>
+    </div>
+
+</div>
+<div *ngIf="batteryCheck()">
+    <div class="mainContent" [style.background]="audioFile[j].color"
+        *ngIf="!screen_playlist && !screen_lyrics && !screen_search && !screen_home && !screen_library">
+        <div class="topHeader">
+            <div>
+                <mat-icon (click)="screen_home=true">expand_more</mat-icon>
+            </div>
+            <div class="topHeaderText">
+                <span>PLAYING FROM PLAYLIST</span>
+                <span>Latest Hits</span>
+            </div>
+            <div>
+                <mat-icon>more_vert</mat-icon>
+            </div>
+        </div>
+        <div class="imgConent">
+            <img [src]="audioFile[j].photo" alt="">
+        </div>
+        <div class="controls">
+            <div class="controlHeading">
+                <div>
+                    <span>{{audioFile[j].title}}</span>
+                    <span>{{audioFile[j].artist}}</span>
+                </div>
+                <div>
+                    <button mat-icon-button (click)="addToFav(j)">
+                        <mat-icon [style.color]="audioFile[j].fav ? '#008f4d':''">{{audioFile[j].fav ? 'favorite' :
+                            'favorite_border'}}</mat-icon>
+                    </button>
+                </div>
+
+            </div>
+            <div class="controlScroller">
+                <mat-slider min="0" max="{{durationseek}}" [value]="seek" (input)="timeChange($event)"></mat-slider>
+                <div class="controlTime">
+                    <span>{{currentTime}}</span>
+                    <span>{{durationTime}}</span>
+                </div>
+            </div>
+            <div class="controlGroup">
+                <mat-icon [style.color]="shufflePlay==true?'#008f4d':'#555'" (click)="shuffle()">shuffle</mat-icon>
+                <mat-icon (click)="previousSong(j)">skip_previous</mat-icon>
+                <mat-icon matRipple [matRippleCentered]="true" [matRippleUnbounded]="true" [matRippleRadius]="36"
+                    (click)="playPause(play, audioFile[j].url)">
+                    {{play==true?'play_circle_filled':'pause_circle_filled'}}
+                </mat-icon>
+                <mat-icon (click)="nextSong(j)">skip_next</mat-icon>
+                <mat-icon [style.color]="repeatLoop==true?'#008f4d':'#555'" (click)="repeatLoop=!repeatLoop">repeat
+                </mat-icon>
+            </div>
+            <div class="controlEnd">
+                <mat-icon>important_devices</mat-icon>
+                <mat-icon (click)="screen_playlist=true">playlist_play</mat-icon>
+            </div>
+        </div>
+        <div class="lyrics" [style.background]="audioFile[j].lyrics_color" (click)="screen_lyrics=!screen_lyrics">
+            <span>LYRICS</span>
+        </div>
+    </div>
+
+    <div class="playlistSection" *ngIf="screen_playlist">
+        <div class="playlistHead">
+            <div>
+                <mat-icon (click)="screen_playlist=false">close</mat-icon>
+            </div>
+            <div class="topHeaderText">
+                <span>PLAYING FROM PLAYLIST</span>
+                <span>Latest Hits</span>
+            </div>
+            <div>
+                <mat-icon></mat-icon>
+            </div>
+        </div>
+        <div class="currentList">
+            <div class="head">
+                Now Playing
+            </div>
+            <div class="currentSong">
+                <div>
+                    <img src="{{audioFile[j].photo}}" width="45" alt="">
+                </div>
+                <div class="songContent">
+                    <div>{{audioFile[j].title}}</div>
+                    <div>{{audioFile[j].artist}}</div>
+                </div>
+            </div>
+        </div>
+        <div class="nextList">
+            <div class="head">
+                Next From: Latest Hits
+            </div>
+            <div cdkDropList class="example-list" (cdkDropListDropped)="drop($event)">
+                <div class="example-box" *ngFor="let i of audioFile,let id=index" cdkDrag>
+                    <div class="nextSong" *ngIf="id>j">
+                        <div class="example-custom-placeholder" *cdkDragPlaceholder>
+                            <div>
+                                <mat-icon>radio_button_unchecked</mat-icon>
+                            </div>
+                            <div class="songContent">
+                                <div>{{i.title}}</div>
+                                <div>{{i.artist}}</div>
+                            </div>
+                            <div class="grabHandle">
+                                <mat-icon>menu</mat-icon>
+                            </div>
+                        </div>
+                        <div>
+                            <mat-icon>radio_button_unchecked</mat-icon>
+                        </div>
+                        <div class="songContent" (click)="playlistSongChange(id)">
+                            <div>{{i.title}}</div>
+                            <div>{{i.artist}}</div>
+                        </div>
+                        <div>
+                            <mat-icon cdkDragHandle class="grabHandle">menu</mat-icon>
+                        </div>
+                        <div *cdkDragPreview>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="playlistControls">
+            <mat-progress-bar mode="determinate" [value]="seek*100/durationseek" color="primary"></mat-progress-bar>
+            <div class="controlGroup">
+                <mat-icon (click)="previousSong(j)">skip_previous</mat-icon>
+                <mat-icon matRipple [matRippleCentered]="true" [matRippleUnbounded]="true" [matRippleRadius]="36"
+                    (click)="playPause(play, audioFile[j].url)">
+                    {{play==true?'play_circle_filled':'pause_circle_filled'}}
+                </mat-icon>
+                <mat-icon (click)="nextSong(j)">skip_next</mat-icon>
+            </div>
+        </div>
+    </div>
+
+    <div class="lyricsSection" [style.background]="audioFile[j].lyrics_color" *ngIf="screen_lyrics">
+        <div class="lyricsHeader">
+            <img src="{{audioFile[j].photo}}" width="60" alt="">
+            <div class="header">
+                <div>{{audioFile[j].title}}</div>
+                <div>{{audioFile[j].artist}}</div>
+            </div>
+            <div class="icon">
+                <mat-icon (click)="screen_lyrics=!screen_lyrics">close</mat-icon>
+            </div>
+        </div>
+        <div class="lyricsContent">
+            <div class="lyricsContentHead">These lyrics aren't time-synced, yet.</div>
+            <div class="lyricsContentMain">
+                <div class="songLyrics" [innerHTML]="audioFile[j].lyrics"></div>
+                <div>Licensed and provided by Musixmatch</div>
+            </div>
+
+        </div>
+        <div class="lyricsControls">
+            <div class="controlScroller">
+                <mat-slider min="0" max="{{durationseek}}" [value]="seek" (input)="timeChange($event)"></mat-slider>
+                <div class="controlTime">
+                    <span>{{currentTime}}</span>
+                    <span>{{durationTime}}</span>
+                </div>
+            </div>
+            <div class="controlGroup">
+                <mat-icon matRipple [matRippleCentered]="true" [matRippleUnbounded]="true" [matRippleRadius]="36"
+                    (click)="playPause(play, audioFile[j].url)">
+                    {{play==true?'play_circle_filled':'pause_circle_filled'}}
+                </mat-icon>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="searchSection" *ngIf="screen_search">
+        <div *ngIf="!screen_search_sub">
+            <div class="searchSub">
+                <div class="searchSubInput">
+                    <div class="searchSubInputHead">Search</div>
+                    <div class="sticky-top">
+                        <div class="searchSubInputBox" (click)="screen_search_sub=!screen_search_sub">
+                            <span>
+                                <div>
+                                    <mat-icon>search</mat-icon>
+                                </div>
+                                <div>
+                                    Artists,songs, or podcasts
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="searchSubTiles">
+                        <div class="searchSubTilesHead">Your top genres</div>
+                        <mat-grid-list cols="2" rowHeight="100px" gutterSize="15px">
+                            <mat-grid-tile><img src="../../assets/images/search1.jpeg" height="100" alt="">
+                            </mat-grid-tile>
+                            <mat-grid-tile><img src="../../assets/images/search2.jpeg" height="100" alt="">
+                            </mat-grid-tile>
+                            <mat-grid-tile><img src="../../assets/images/search3.jpeg" height="100" alt="">
+                            </mat-grid-tile>
+                            <mat-grid-tile><img src="../../assets/images/search4.jpeg" height="100" alt="">
+                            </mat-grid-tile>
+                        </mat-grid-list>
+                        <div class="searchSubTilesHead">Browse All</div>
+                        <mat-grid-list cols="2" rowHeight="100px" gutterSize="15px">
+                            <mat-grid-tile><img src="../../assets/images/search11.jpeg" height="100" alt="">
+                            </mat-grid-tile>
+                            <mat-grid-tile><img src="../../assets/images/search12.jpeg" height="100" alt="">
+                            </mat-grid-tile>
+                            <mat-grid-tile><img src="../../assets/images/search13.jpeg" height="100" alt="">
+                            </mat-grid-tile>
+                            <mat-grid-tile><img src="../../assets/images/search14.jpeg" height="100" alt="">
+                            </mat-grid-tile>
+                        </mat-grid-list>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div *ngIf="screen_search_sub">
+            <div class="searchInput">
+                <mat-form-field>
+                    <!-- <mat-label>Telephone</mat-label> -->
+                    <mat-icon matPrefix (click)="screen_search_sub=!screen_search_sub">arrow_back</mat-icon>
+                    <input matInput autoFocus autocomplete="off" (keyup)="search($event)" [(ngModel)]="searchValue">
+                    <mat-icon matSuffix>360</mat-icon>
+                </mat-form-field>
+            </div>
+            <div class="searchList">
+                <div class="searchListHead" *ngIf="searchValue==''">
+                    Recent Search
+                </div>
+                <div class="searchItem" *ngFor="let i of search_array">
+                    <img src="{{i.photo}}" width="50" alt="">
+                    <div class="header">
+                        <div>{{i.title}}</div>
+                        <div>Song &#8226; {{i.artist}}</div>
+                    </div>
+                    <div class="icon">
+                        <mat-icon *ngIf="searchValue!=''">more_vert</mat-icon>
+                        <mat-icon *ngIf="searchValue==''">close</mat-icon>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="searchControls">
+            <mat-progress-bar mode="determinate" [value]="seek*100/durationseek" color="primary"></mat-progress-bar>
+            <div class="controlGroup">
+                <img [src]='audioFile[j].photo' width='60' alt="">
+                <div class="content" (click)="screen_search=!screen_search;screen_search_sub=false">
+                    <div>{{audioFile[j].title}}</div>
+                    <div>{{audioFile[j].artist}}</div>
+                </div>
+                <div class="iconGroup">
+                    <mat-icon>important_devices</mat-icon>
+                    <mat-icon [style.color]="audioFile[j].fav ? '#008f4d':''" (click)="addToFav(j)">{{audioFile[j].fav ?
+                        'favorite' : 'favorite_border'}}</mat-icon>
+                    <mat-icon matRipple [matRippleCentered]="true" [matRippleUnbounded]="true" [matRippleRadius]="16"
+                        (click)="playPause(play, audioFile[j].url)">{{play==true?'play_arrow':'pause'}}
+                    </mat-icon>
+                </div>
+            </div>
+        </div>
+        <div class="totalGroup">
+            <div>
+                <mat-icon class="material-icons-round"
+                    (click)="screen_home=!screen_home;screen_search=false;screen_search_sub=false">home</mat-icon>
+                <div>Home</div>
+            </div>
+            <div class="activeScreen">
+                <mat-icon class="material-icons-round">search</mat-icon>
+                <div>Search</div>
+            </div>
+            <div>
+                <mat-icon class="material-icons-outlined"
+                    (click)="screen_library=!screen_library;screen_search=false;screen_search_sub=false">library_books
+                </mat-icon>
+                <div>Library</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="homeSection" *ngIf="screen_home">
+        <div class="homeContent">
+            <div class="homeHead">
+                <div class="homeWish">{{wishAccTime()}}</div>
+                <div class="homeSetting">
+                    <mat-icon class="material-icons-outlined">settings</mat-icon>
+                </div>
+            </div>
+            <div class="homeTiles">
+                <mat-grid-list cols="2" rowHeight="50px" gutterSize="8px">
+                    <mat-grid-tile>
+                        <div>
+                            <img src="../../assets/images/crop_480x480_1610357558.jpg" height="50" alt="">
+                        </div>
+                        <div class="homeTilesHead">
+                            Chitti
+                        </div>
+                    </mat-grid-tile>
+                    <mat-grid-tile>
+                        <div>
+                            <img src="../../assets/images/master.jpeg" height="50" alt="">
+                        </div>
+                        <div class="homeTilesHead">
+                            Master
+                        </div>
+                    </mat-grid-tile>
+                    <mat-grid-tile>
+                        <div>
+                            <img src="../../assets/images/ManaJathiratnalu.jpg" height="25" alt="">
+                            <img src="../../assets/images/amrutha_song.jpg" height="25" alt=""><br>
+                            <img src="../../assets/images/HeyAbbayi.jpg" height="25" alt="">
+                            <img src="../../assets/images/crop_480x480_1610357558.jpg" height="25" alt="">
+                        </div>
+                        <div class="homeTilesHead">
+                            Latest Telugu
+                        </div>
+                    </mat-grid-tile>
+                    <mat-grid-tile>
+                        <div>
+                            <img src="../../assets/images/chellama.jpg" height="50" alt="">
+                        </div>
+                        <div class="homeTilesHead">
+                            Chellamma
+                        </div>
+                    </mat-grid-tile>
+                    <mat-grid-tile>
+                        <div>
+                            <img src="../../assets/images/HeyAbbayi.jpg" height="50" alt="">
+                        </div>
+                        <div class="homeTilesHead">
+                            Hey Abbayi
+                        </div>
+                    </mat-grid-tile>
+                    <mat-grid-tile>
+                        <div>
+                            <img src="../../assets/images/ManaJathiratnalu.jpg" height="50" alt="">
+                        </div>
+                        <div class="homeTilesHead">
+                            JathiRatnalu
+                        </div>
+                    </mat-grid-tile>
+                </mat-grid-list>
+            </div>
+            <div class="homeScroll">
+                <div class="homeScrollHome">
+                    The best of The Ranveer Show
+                </div>
+                <div class="homeList">
+                    <div class="homeListItem">
+                        <div class="homeListImage">
+                            <img src="../../assets/images/home/home1.jpg" height="170" alt="">
+                        </div>
+                        <div class="homeListContent">
+                            <div class="firstContent">Priyanka Chopra Opens Up on..</div>
+                            <div class="subContent">The Ranveer Show</div>
+                        </div>
+                    </div>
+                    <div class="homeListItem">
+                        <div class="homeListImage">
+                            <img src="../../assets/images/home/home2.jpg" height="170" alt="">
+                        </div>
+                        <div class="homeListContent">
+                            <div class="firstContent">The Inspiring Journey Of A LE..</div>
+                            <div class="subContent">The Ranveer Show</div>
+                        </div>
+                    </div>
+                    <div class="homeListItem">
+                        <div class="homeListImage">
+                            <img src="../../assets/images/home/home3.jpg" height="170" alt="">
+                        </div>
+                        <div class="homeListContent">
+                            <div class="firstContent">Jay Shetty On How To Think ...</div>
+                            <div class="subContent">The Ranveer Show</div>
+                        </div>
+                    </div>
+                    <div class="homeListItem">
+                        <div class="homeListImage">
+                            <img src="../../assets/images/home/home4.jpg" height="170" alt="">
+                        </div>
+                        <div class="homeListContent">
+                            <div class="firstContent">Luke Coutinho On Mental Tou ..</div>
+                            <div class="subContent">The Ranveer Show</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="homeScroll">
+                <div class="homeScrollHome">
+                    Recently Played
+                </div>
+                <div class="homeList">
+                    <div class="homeListItem homeListItemRecent" *ngFor="let i of audioFile">
+                        <div class="homeListImage">
+                            <img src="{{i.photo}}" height="110" alt="">
+                        </div>
+                        <div class="homeListContent">
+                            <div class="firstContent">{{i.title}}</div>
+                            <!-- <div class="subContent"> {{i.artist}}</div> -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="searchControls">
+            <mat-progress-bar mode="determinate" [value]="seek*100/durationseek" color="primary"></mat-progress-bar>
+            <div class="controlGroup">
+                <img [src]='audioFile[j].photo' width='60' alt="">
+                <div class="content" (click)="screen_home=!screen_home">
+                    <div>{{audioFile[j].title}}</div>
+                    <div>{{audioFile[j].artist}}</div>
+                </div>
+                <div class="iconGroup">
+                    <mat-icon>important_devices</mat-icon>
+                    <mat-icon [style.color]="audioFile[j].fav ? '#008f4d':''" (click)="addToFav(j)">{{audioFile[j].fav ?
+                        'favorite' : 'favorite_border'}}</mat-icon>
+                    <mat-icon matRipple [matRippleCentered]="true" [matRippleUnbounded]="true" [matRippleRadius]="16"
+                        (click)="playPause(play, audioFile[j].url)">{{play==true?'play_arrow':'pause'}}
+                    </mat-icon>
+                </div>
+            </div>
+        </div>
+        <div class="totalGroup">
+            <div class="activeScreen">
+                <mat-icon class="material-icons-round">home</mat-icon>
+                <div>Home</div>
+            </div>
+            <div>
+                <mat-icon class="material-icons-round" (click)="screen_search=!screen_search;screen_home=false">search
+                </mat-icon>
+                <div>Search</div>
+            </div>
+            <div>
+                <mat-icon class="material-icons-outlined" (click)="screen_library=!screen_library;screen_home=false">
+                    library_books</mat-icon>
+                <div>Library</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="librarySection" *ngIf="screen_library">
+        <div class="libraryMain" *ngIf="!screen_libraryPlaylist">
+            <div class="libraryHeading">
+                <div class="libraryHead">
+                    <div class="profileIcon">J</div>
+                    <span class="title">Your Library</span>
+                    <div class="headIcons">
+                        <mat-icon>search</mat-icon>
+                        <mat-icon>add</mat-icon>
+                    </div>
+                </div>
+                <div class="chips">
+                    <mat-chip-list>
+                        <mat-chip>Playlists</mat-chip>
+                        <mat-chip>Artists</mat-chip>
+                    </mat-chip-list>
+                </div>
+            </div>
+            <div class="libraryContent">
+                <div class="libraryContentHead">
+                    <span class="libraryContentHeadLeft">
+                        <mat-icon>swap_vert</mat-icon>
+                        <span>Recently played</span>
+                    </span>
+
+                    <span (click)="libraryView = !libraryView">
+                        <mat-icon>{{libraryView ? 'grid_view' : 'list'}}</mat-icon>
+                    </span>
+                </div>
+                <div class="libraryContentTiles">
+                    <mat-grid-list [cols]="libraryView ? '1':'2'" [gutterSize]="libraryView ? '15px':'10px'"
+                        [rowHeight]="libraryView ? '50px':'220px'">
+                        <mat-grid-tile [class]="libraryView ? 'rowGrid': 'colGrid'"
+                            (click)="getPlaylist('Liked Songs')">
+                            <div class="imageGrid">
+                                <img src="../../assets/images/likedImage.jpeg" [height]="libraryView ? '50':'180'"
+                                    alt="">
+                            </div>
+                            <div class="libraryPlaylistName">
+                                <div class="main">Liked Songs</div>
+                                <div class="sub">
+                                    <mat-icon class="pinIcon">push_pin</mat-icon> <span>&nbsp;Playlist •
+                                        {{getFavSongNum()}} songs</span>
+                                </div>
+                            </div>
+                        </mat-grid-tile>
+                        <mat-grid-tile [class]="libraryView ? 'rowGrid': 'colGrid'">
+                            <div class="imageGrid">
+                                <img src="../../assets/images/crop_480x480_1610357558.jpg"
+                                    [height]="libraryView ? '25':'90'" alt="">
+                                <img src="../../assets/images/HeyAbbayi.jpg" [height]="libraryView ? '25':'90'"
+                                    alt=""><br>
+                                <img src="../../assets/images/chellama.jpg" [height]="libraryView ? '25':'90'" alt="">
+                                <img src="../../assets/images/ManaJathiratnalu.jpg" [height]="libraryView ? '25':'90'"
+                                    alt="">
+                            </div>
+                            <div class="libraryPlaylistName">
+                                <div class="main">Latest Hits</div>
+                                <div class="sub">Playlist • Jella SaiKiran</div>
+                            </div>
+                        </mat-grid-tile>
+                    </mat-grid-list>
+                </div>
+            </div>
+
+        </div>
+        <div class="libraryPlaylist" *ngIf="screen_libraryPlaylist">
+            <div class="libraryPlaylistHead">
+                <div class="topHeader">
+                    <div>
+                        <mat-icon (click)="screen_libraryPlaylist=false">arrow_back</mat-icon>
+                    </div>
+                    <div class="topHeaderText">
+                        <span>{{playlistSongTitle}}</span>
+                    </div>
+                    <div>
+                        <mat-icon>more_vert</mat-icon>
+                    </div>
+                </div>
+                <div class="libraryPlaylistTitle">
+                    {{playlistSongTitle}}
+                </div>
+                <div class="libraryPlaylistTitleButton">
+                    <button mat-flat-button>Shuffle play</button>
+                </div>
+            </div>
+            <div class="libraryPlaylistSongs">
+                <div class="libraryPlaylistSongList" *ngFor="let i of playlistSongs">
+                    <div class="song">
+                        <div>
+                            <img src="{{i.photo}}" width="45" alt="">
+                        </div>
+                        <div class="songContent">
+                            <div>{{i.title}}</div>
+                            <div>{{i.artist}}</div>
+                        </div>
+                    </div>
+                    <div>
+                        <mat-icon>more_vert</mat-icon>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="searchControls">
+            <mat-progress-bar mode="determinate" [value]="seek*100/durationseek" color="primary"></mat-progress-bar>
+            <div class="controlGroup">
+                <img [src]='audioFile[j].photo' width='60' alt="">
+                <div class="content" (click)="screen_library=!screen_library">
+                    <div>{{audioFile[j].title}}</div>
+                    <div>{{audioFile[j].artist}}</div>
+                </div>
+                <div class="iconGroup">
+                    <mat-icon>important_devices</mat-icon>
+                    <mat-icon [style.color]="audioFile[j].fav ? '#008f4d':''" (click)="addToFav(j); getPlaylist('')">
+                        {{audioFile[j].fav ? 'favorite' : 'favorite_border'}}
+                    </mat-icon>
+                    <mat-icon matRipple [matRippleCentered]="true" [matRippleUnbounded]="true" [matRippleRadius]="16"
+                        (click)="playPause(play, audioFile[j].url)">{{play==true?'play_arrow':'pause'}}
+                    </mat-icon>
+                </div>
+            </div>
+        </div>
+        <div class="totalGroup">
+            <div>
+                <mat-icon class="material-icons-round" (click)="screen_home=!screen_home;screen_library=false">home
+                </mat-icon>
+                <div>Home</div>
+            </div>
+            <div>
+                <mat-icon class="material-icons-round" (click)="screen_search=!screen_search;screen_library=false">
+                    search
+                </mat-icon>
+                <div>Search</div>
+            </div>
+            <div class="activeScreen">
+                <mat-icon class="material-icons-outlined">library_books</mat-icon>
+                <div>Library</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="!batteryCheck()" class="powerOff">
+    <mat-spinner color="accent" *ngIf="powerOff"></mat-spinner>
+    <div *ngIf="powerOff"> Shutting Down</div>
+</div>
